@@ -21,6 +21,7 @@ client = discord.Client()
 async def on_message(message):
     triggers = dbPy.getDBList("triggers")
     responses = dbPy.getDBList("responses")
+    shyness = float(dbPy.getDBValue("shyness"))
     if message.author.bot:
         return
     top = ""
@@ -29,15 +30,30 @@ async def on_message(message):
     for trigger in triggers:
         score = 0
         if trigger.lower() in message.content.lower() or message.content.lower() in trigger.lower():
-            score += (abs(len(message.content) - len(trigger))/len(message.content))*len(triggers)
+            score += abs(len(message.content) - len(trigger))/(len(message.content) + 1)*len(triggers)
         if score > topS:
             top = responses[i]
             topS = score
 
         i += 1
 
-    if topS > (len(triggers)/(len(triggers) - 1)):
-        await message.channel.send(top)
+    if topS > (len(triggers)/(len(triggers) - shyness)):
+        try:
+            await message.channel.trigger_typing()
+            await asyncio.sleep(math.floor(len(top)/10))
+            await message.channel.send(top)
+            shyness = shyness*0.8
+        except:
+            for channel in message.guild.channels:
+                try:
+                    scream = ""
+                    for x in range(random.randint(1, 15)):
+                        scream += random.choice(["a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G"])
+                    exclamations = "!"*random.randint(0,3)
+                    channel.send(f"{scream} I can't talk in <#{message.channel.id}> and I have something perfect to say" + exclamations)
+                    break
+                except:
+                    pass
     else:
         def check(m):
             global msg
@@ -51,6 +67,6 @@ async def on_message(message):
         responses.append(msg)
         dbPy.storeDBList("triggers", triggers)
         dbPy.storeDBList("responses", responses)
-
+        dbPy.storeDBValue("shyness", shyness)
 
 client.run(TOKEN)
