@@ -41,16 +41,24 @@ async def on_message(message):
         try:
             await message.channel.trigger_typing()
             await asyncio.sleep(math.floor(len(top)/10))
-            await message.channel.send(top)
-            shyness = shyness*0.8
-        except:
+            prob = (random.randint(0, 1000))/1000
+            print(prob)
+            print(shyness)
+            if prob > shyness:
+                await message.reply(top, mention_author=random.choice([True, False, False, False, False, False, False, False]))
+            else:
+                await message.channel.send(top)
+            shyness = shyness*0.99999
+            dbPy.storeDBValue("shyness", shyness)
+        except Exception as e:
+            print(e)
             for channel in message.guild.channels:
                 try:
                     scream = ""
-                    for x in range(random.randint(1, 15)):
+                    for x in range(random.randint(8, 15)):
                         scream += random.choice(["a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G"])
                     exclamations = "!"*random.randint(0,3)
-                    channel.send(f"{scream} I can't talk in <#{message.channel.id}> and I have something perfect to say" + exclamations)
+                    await channel.send(f"{scream} I can't talk in <#{message.channel.id}> and I have something perfect to say" + exclamations)
                     break
                 except:
                     pass
@@ -67,6 +75,5 @@ async def on_message(message):
         responses.append(msg)
         dbPy.storeDBList("triggers", triggers)
         dbPy.storeDBList("responses", responses)
-        dbPy.storeDBValue("shyness", shyness)
 
 client.run(TOKEN)
