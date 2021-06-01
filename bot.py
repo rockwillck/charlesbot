@@ -22,6 +22,14 @@ async def on_message(message):
     triggers = dbPy.getDBList("triggers")
     responses = dbPy.getDBList("responses")
     shyness = float(dbPy.getDBValue("shyness"))
+    if message.content == ".stats":
+        embedVar = Embed(title="Stats", value="The only command Charles will ever fulfill.", color=Colour.blue())
+        embedVar.add_field(name="Shyness", value=shyness, inline=False)
+        embedVar.add_field(name="Phrases", value=len(triggers), inline=False)
+        embedVar.add_field(name="Servers", value=len(client.guilds), inline=False)
+        await message.channel.send(embed=embedVar)
+        return
+        
     if message.author.bot:
         return
     top = ""
@@ -42,16 +50,13 @@ async def on_message(message):
             await message.channel.trigger_typing()
             await asyncio.sleep(math.floor(len(top)/10))
             prob = (random.randint(0, 1000))/1000
-            print(prob)
-            print(shyness)
             if prob > shyness:
                 await message.reply(top, mention_author=random.choice([True, False, False, False, False, False, False, False]))
             else:
                 await message.channel.send(top)
             shyness = shyness*0.99999
             dbPy.storeDBValue("shyness", shyness)
-        except Exception as e:
-            print(e)
+        except:
             for channel in message.guild.channels:
                 try:
                     scream = ""
